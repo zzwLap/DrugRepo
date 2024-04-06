@@ -1,8 +1,72 @@
-<script setup>
-</script>
-
 <template>
-  <main>
-    <h1>Home</h1>
-  </main>
+  <div class="container">
+    <el-menu active-text-color="#ffd04b" background-color="#545c64" class="menu"
+      default-active="/authorization/user-manage" router="true" text-color="#fff">
+      <el-sub-menu index="/settings">
+        <template #title>
+          <el-icon>
+            <setting />
+          </el-icon>
+          <span>系统设置</span>
+        </template>
+        <el-menu-item index="/settings/dictionary-setting">字典设置</el-menu-item>
+      </el-sub-menu>
+      <el-sub-menu index="/authorization">
+        <template #title>
+          <el-icon>
+            <document />
+          </el-icon>
+          <span>权限管理</span>
+        </template>
+        <el-menu-item index="/authorization/user-manage">用户管理</el-menu-item>
+        <el-menu-item index="/authorization/role-manage">角色管理</el-menu-item>
+        <el-menu-item index="/authorization/authorization-manage">权限管理</el-menu-item>
+      </el-sub-menu>
+      <el-sub-menu index="3">
+        <template #title>
+          <el-icon>
+            <icon-menu />
+          </el-icon>
+          <span>药品管理</span>
+        </template>
+        <el-menu-item index="3-1">药品信息</el-menu-item>
+        <el-menu-item index="3-2">库存管理</el-menu-item>
+        <el-menu-item index="3-3">调拨管理</el-menu-item>
+        <el-menu-item index="3-4">损益管理</el-menu-item>
+        <el-menu-item index="3-5">盘点管理</el-menu-item>
+        <el-menu-item index="3-6">入库管理</el-menu-item>
+        <el-menu-item index="3-7">出库管理</el-menu-item>
+        <el-menu-item index="3-8">药品变更记录</el-menu-item>
+      </el-sub-menu>
+
+    </el-menu>
+    <RouterView class="router" />
+  </div>
 </template>
+
+<style scoped>
+.container {
+  height: 100%;
+  display: flex;
+}
+
+.menu {
+  width: 250px;
+  height: 100%;
+}
+
+.router {
+  flex: 1;
+}
+</style>
+
+<script lang="ts" setup>
+import { RouterView } from 'vue-router'
+import {
+  Document,
+  Menu as IconMenu,
+  Location,
+  Setting,
+} from '@element-plus/icons-vue'
+
+</script>
