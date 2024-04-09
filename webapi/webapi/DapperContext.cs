@@ -11,7 +11,7 @@ namespace webapi
         public DapperContext(IConfiguration configuration)
         {
             _configuration = configuration;
-            _connectionString = _configuration.GetConnectionString("MyContext");
+            _connectionString = _configuration.GetConnectionString("MyContext")!;
         }
 
         public IDbConnection CreateConnection()

@@ -9,11 +9,13 @@ namespace webapi.Data
 {
     public class MyContext : DbContext
     {
-        public MyContext (DbContextOptions<MyContext> options)
+        public MyContext(DbContextOptions<MyContext> options)
             : base(options)
         {
         }
 
         public DbSet<webapi.Models.User> User { get; set; } = default!;
+        public DbSet<webapi.Models.DataDictionary> DataDictionary { get; set; } = default!;
+        public DbSet<webapi.Models.HierarchyDictionary> HierachyDictionary { get; set; } = default!;
     }
 }
