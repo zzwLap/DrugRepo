@@ -29,8 +29,8 @@ namespace webapi
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUser()
         {
-            var uid=this.GetUserId();
-            Console.WriteLine($"login user: {uid}");
+            //var uid=this.GetUserId();
+            //Console.WriteLine($"login user: {uid}");
 
             return await _context.User.ToListAsync();
         }
@@ -93,6 +93,11 @@ namespace webapi
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(User user)
         {
+            if(await _context.User.AnyAsync(x => x.UserId==user.UserId))
+            {
+                throw new Exception("账号不能重复");
+            }
+
             _context.User.Add(user);
             await _context.SaveChangesAsync();
 
