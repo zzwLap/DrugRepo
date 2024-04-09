@@ -32,11 +32,10 @@ namespace webapi
         [HttpGet]
         public async Task<string> Login(string username, string password)
         {
-            var user=await _context.User.FirstOrDefaultAsync(x=>x.UserName==username&&x.Password==password);
+            var user=await _context.User.FirstOrDefaultAsync(x=>x.UserId==username&&x.Password==password);
             if (user==null)
             {
-                // 密码错误
-                return null;
+                throw new Exception("账号或密码错误");
             }
 
             var claims = new Claim[]
