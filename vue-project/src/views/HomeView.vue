@@ -1,3 +1,21 @@
+<script lang="ts" setup>
+import { RouterView } from 'vue-router'
+import {
+  Document,
+  Menu as IconMenu,
+  Setting,
+  ArrowDown
+} from '@element-plus/icons-vue'
+import { tokenStore } from '@/utils/request';
+import router from '@/router';
+
+const logout=()=>{
+  tokenStore.token=''
+  router.push('/login')
+}
+</script>
+
+
 <template>
   <div class="container">
     <nav>
@@ -54,7 +72,7 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item>个人信息</el-dropdown-item>
-              <el-dropdown-item>退出登录</el-dropdown-item>
+              <el-dropdown-item @click="logout">退出登录</el-dropdown-item>
             </el-dropdown-menu>
           </template>
         </el-dropdown>
@@ -114,13 +132,3 @@ nav {
 }
 </style>
 
-<script lang="ts" setup>
-import { RouterView } from 'vue-router'
-import {
-  Document,
-  Menu as IconMenu,
-  Setting,
-  ArrowDown
-} from '@element-plus/icons-vue'
-
-</script>
