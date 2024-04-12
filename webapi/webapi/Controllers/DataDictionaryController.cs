@@ -84,19 +84,10 @@ namespace webapi.Controllers
 
             var dict3 = new HierarchyDictionary() { Id = 0, Description = dict.Description, DisplayName = dict.DisplayName, CategoryName = dict.CategoryName, Value = maxValudId + 1, ParentId = dict.ParentId };
 
-            if (maxValudId == 0)
-            {
-                var checkFirstKey = drugContext.HierachyDictionary.Any(t => t.CategoryName == dict.CategoryName);
-                if (!checkFirstKey)
-                {
-                    dict3.Value = 0;
-                }
-            }
-
             if (dict.ParentId == 0)
             {
                 var checkTopLevel = await drugContext.HierachyDictionary.AnyAsync(t => t.CategoryName == dict.CategoryName && t.ParentId == 0);
-                if (!checkTopLevel)
+                if (checkTopLevel)
                 {
                     throw new Exception("只允许有一个顶级目录");
                 }
@@ -118,8 +109,29 @@ namespace webapi.Controllers
         [HttpPost]
         public async Task<List<HierachyDictionaryDto>> GetAllHierachyDictionary()
         {
-            var result = await drugContext.HierachyDictionary.Select(t => new HierachyDictionaryDto() { Value = t.Value, Description = t.Description, Id = t.Id, DisplayName = t.DisplayName }).ToListAsync();
+            var result = await drugContext.HierachyDictionary.Select(t => new HierachyDictionaryDto()
+            {
+                Value = t.Value,
+                Description = t.Description,
+                Id = t.Id,
+                DisplayName = t.DisplayName,
+                CategoryName = t.CategoryName,
+                ParentId = t.ParentId,
+            }).ToListAsync();
             return result;
+        }
+        [HttpGet]
+        public async Task<List<HierachyDictionaryDto>> GetHierachyDictionary(string categoryName)
+        {
+            return await drugContext.HierachyDictionary.Where(t => t.CategoryName == categoryName).Select(t => new HierachyDictionaryDto()
+            {
+                Value = t.Value,
+                Description = t.Description,
+                Id = t.Id,
+                DisplayName = t.DisplayName,
+                CategoryName = t.CategoryName,
+                ParentId = t.ParentId,
+            }).ToListAsync();
         }
     }
 
@@ -134,8 +146,10 @@ namespace webapi.Controllers
     public record HierachyDictionaryDto
     {
         public int Id { get; set; }
+        public int ParentId { get; set; }
         public string DisplayName { get; set; }
         public int Value { get; set; }
+        public string CategoryName { get; set; }
         public string Description { get; set; }
     }
 
