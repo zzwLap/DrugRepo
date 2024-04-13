@@ -22,25 +22,6 @@ namespace webapi.Controllers
         [HttpPost]
         public void AddDrugs(AddDrugVo drugVo)
         {
-            var drug = new Drugs();
-            drug.DrugId = drugVo.DrugId;
-            drug.DrugName = drugVo.DrugName;
-            drug.Spec = drugVo.Spec;
-            drug.PinYin = drugVo.PinYin;
-            drug.Sort = drugVo.Sort;
-            drug.ClinicalUnit = drugVo.ClinicalUnit;
-            drug.PackageUnit = drugVo.PackageUnit;
-            drug.C2PQuantity = drugVo.C2PQuantity;
-            drug.ApprovalNumber = drugVo.ApprovalNumber;
-            drug.DrugCode = drugVo.DrugCode;
-            drug.NationDrugCode = drugVo.NationDrugCode;
-            drug.RADManufacturer = drugVo.RADManufacturer;
-            drug.DosageForm = drugVo.DosageForm;
-            drug.DefaultSaleUnit = drugVo.DefaultSaleUnit;
-            drug.ClinicalSaleUnit = drugVo.ClinicalSaleUnit;
-            drug.PackagePrice = drugVo.PackagePrice;
-            drug.ClinicalPrice = drugVo.ClinicalPrice;
-
             var drugs = new Drugs();
             drugContext.Drugs.Add(drugs);
             var drug2 = drugContext.Entry(drugs);
