@@ -22,6 +22,13 @@ namespace webapi.Controllers
         [HttpPost]
         public void AddDrugs(AddDrugVo drugVo)
         {
+            drugVo.DrugId = 0;
+
+            var checkDupDrug = drugContext.Drugs.Any(t => t.DrugCode == drugVo.DrugCode);
+            if (checkDupDrug)
+            {
+                throw new Exception("该药品编码已经被使用");
+            }
             var drugs = new Drugs();
             drugContext.Drugs.Add(drugs);
             var drug2 = drugContext.Entry(drugs);
@@ -51,6 +58,12 @@ namespace webapi.Controllers
             if (drugInfo == null)
             {
                 throw new Exception($"未找到药品编号【{drugInfoVo.DrugId}】的记录信息");
+            }
+            var checkDupDrug = drugContext.Drugs.Any(t => t.DrugCode == drugInfoVo.DrugCode
+                            && t.DrugId == drugInfoVo.DrugId);
+            if (checkDupDrug)
+            {
+                throw new Exception("该药品编码已经被使用");
             }
             var drug = drugContext.Drugs.Entry(drugInfo);
             drug.CurrentValues.SetValues(drugInfoVo);
