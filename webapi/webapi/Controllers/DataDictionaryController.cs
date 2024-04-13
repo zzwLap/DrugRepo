@@ -22,6 +22,7 @@ namespace webapi.Controllers
             var dict = drugContext.DataDictionary.Select(t => new DictionaryDto() { DisplayName = t.DisplayName, CategoryName = t.CategoryName, Id = t.Id, Value = t.Value });
             return dict.ToListAsync();
         }
+
         [HttpPost]
         public Task<List<DictionaryDto>> GetDictionaries(List<string> categoryNames)
         {
@@ -29,6 +30,15 @@ namespace webapi.Controllers
                   .Select(t => new DictionaryDto() { DisplayName = t.DisplayName, CategoryName = t.CategoryName, Id = t.Id, Value = t.Value });
             return dict.ToListAsync();
         }
+
+        [HttpGet]
+        public Task<List<DictionaryDto>> GetDictionaries(string categoryName)
+        {
+            var dict = drugContext.DataDictionary.Where(t => categoryName == t.CategoryName)
+                  .Select(t => new DictionaryDto() { DisplayName = t.DisplayName, CategoryName = t.CategoryName, Id = t.Id, Value = t.Value });
+            return dict.ToListAsync();
+        }
+
         [HttpPost]
         public async Task AddDictionary(DataDictionaryVo dict)
         {
@@ -106,7 +116,7 @@ namespace webapi.Controllers
             await drugContext.SaveChangesAsync();
         }
 
-        [HttpPost]
+        [HttpGet]
         public async Task<List<HierachyDictionaryDto>> GetAllHierachyDictionary()
         {
             var result = await drugContext.HierachyDictionary.Select(t => new HierachyDictionaryDto()
