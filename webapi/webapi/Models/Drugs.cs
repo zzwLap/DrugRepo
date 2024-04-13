@@ -41,8 +41,10 @@ namespace webapi.Models
         public int ClinicalSaleUnit { get; set; }
 
         [Comment("包装单位销售单价")]
-        public int PackagePrice { get; set; }
+        [Precision(16, 4)]
+        public decimal PackagePrice { get; set; }
         [Comment("临床销售单价")]
-        public int ClinicalPrice { get; set; }
+        [Precision(16, 4)]
+        public decimal ClinicalPrice { get; set; }
     }
 }

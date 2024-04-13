@@ -1,0 +1,151 @@
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
+using webapi.Data;
+using webapi.Models;
+
+namespace webapi.Controllers
+{
+    [Route("api/[controller]/[action]")]
+    [ApiController]
+    [AllowAnonymous]
+    public class DrugsController(MyContext drugContext) : ControllerBase
+    {
+        private readonly MyContext drugContext = drugContext;
+
+        [HttpGet]
+        public async Task<List<DrugDto>> GetDrugs()
+        {
+            return await drugContext.Drugs.AsNoTrackingWithIdentityResolution().SelectByType<Drugs, DrugDto>().ToListAsync();
+        }
+        [HttpPost]
+        public void AddDrugs(AddDrugVo drugVo)
+        {
+            var drug = new Drugs();
+            drug.DrugId = drugVo.DrugId;
+            drug.DrugName = drugVo.DrugName;
+            drug.Spec = drugVo.Spec;
+            drug.PinYin = drugVo.PinYin;
+            drug.Sort = drugVo.Sort;
+            drug.ClinicalUnit = drugVo.ClinicalUnit;
+            drug.PackageUnit = drugVo.PackageUnit;
+            drug.C2PQuantity = drugVo.C2PQuantity;
+            drug.ApprovalNumber = drugVo.ApprovalNumber;
+            drug.DrugCode = drugVo.DrugCode;
+            drug.NationDrugCode = drugVo.NationDrugCode;
+            drug.RADManufacturer = drugVo.RADManufacturer;
+            drug.DosageForm = drugVo.DosageForm;
+            drug.DefaultSaleUnit = drugVo.DefaultSaleUnit;
+            drug.ClinicalSaleUnit = drugVo.ClinicalSaleUnit;
+            drug.PackagePrice = drugVo.PackagePrice;
+            drug.ClinicalPrice = drugVo.ClinicalPrice;
+
+            var drugs = new Drugs();
+            drugContext.Drugs.Add(drugs);
+            var drug2 = drugContext.Entry(drugs);
+            drug2.CurrentValues.SetValues(drugVo);
+
+            drugContext.SaveChanges();
+        }
+
+        [HttpPost]
+        public void ModifyPrice(ChangeDrugPriceVo drugPrice)
+        {
+            var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugPrice.DrugId);
+            if (drugInfo == null)
+            {
+                throw new Exception($"未找到药品编号【{drugPrice.DrugId}】的记录信息");
+            }
+            drugInfo.PackagePrice = drugPrice.PackagePrice;
+            drugPrice.ClinicalPrice = drugPrice.ClinicalPrice;
+            //TODO 这里应该记录一下每次修改单价后的记录
+            drugContext.SaveChanges();
+        }
+
+        [HttpPost]
+        public void ModifyDrugInfo(UpdateDrugInfoVo drugInfoVo)
+        {
+            var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugInfoVo.DrugId);
+            if (drugInfo == null)
+            {
+                throw new Exception($"未找到药品编号【{drugInfoVo.DrugId}】的记录信息");
+            }
+            var drug = drugContext.Drugs.Entry(drugInfo);
+            drug.CurrentValues.SetValues(drugInfoVo);
+            drugContext.SaveChanges();
+        }
+    }
+
+    public class ChangeDrugPriceVo
+    {
+        public int DrugId { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "包装单位的销售价要大于或等于0")]
+        public decimal PackagePrice { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "临床单位销售价要大于或等于0")]
+        public decimal ClinicalPrice { get; set; }
+    }
+
+    public class UpdateDrugInfoVo
+    {
+        [Key]
+        public int DrugId { get; set; }
+        [Required]
+        public string DrugName { get; set; }
+        public string Spec { get; set; }
+        public string PinYin { get; set; }
+        public int Sort { get; set; }
+        [Required]
+        public string ClinicalUnit { get; set; }
+        [Required]
+        public string PackageUnit { get; set; }
+        //[Range(1, double.MaxValue)]
+        //public int C2PQuantity { get; set; }
+        public string ApprovalNumber { get; set; }
+        [Required]
+        public string DrugCode { get; set; }
+        public string NationDrugCode { get; set; }
+        public string RADManufacturer { get; set; }
+        [Required]
+        public string DosageForm { get; set; }
+        [Required]
+        public int DefaultSaleUnit { get; set; }
+        [Required]
+        public int ClinicalSaleUnit { get; set; }
+    }
+    public class AddDrugVo : DrugDto
+    {
+    }
+
+    public class DrugDto
+    {
+        [Key]
+        public int DrugId { get; set; }
+        [Required]
+        public string DrugName { get; set; }
+        public string Spec { get; set; }
+        public string PinYin { get; set; }
+        public int Sort { get; set; }
+        [Required]
+        public string ClinicalUnit { get; set; }
+        [Required]
+        public string PackageUnit { get; set; }
+        [Range(1, double.MaxValue)]
+        public int C2PQuantity { get; set; }
+        public string ApprovalNumber { get; set; }
+        [Required]
+        public string DrugCode { get; set; }
+        public string NationDrugCode { get; set; }
+        public string RADManufacturer { get; set; }
+        [Required]
+        public string DosageForm { get; set; }
+        [Required]
+        public int DefaultSaleUnit { get; set; }
+        [Required]
+        public int ClinicalSaleUnit { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "包装单位的销售价要大于或等于0")]
+        public decimal PackagePrice { get; set; }
+        [Range(0, double.MaxValue, ErrorMessage = "临床单位销售价要大于或等于0")]
+        public decimal ClinicalPrice { get; set; }
+    }
+}

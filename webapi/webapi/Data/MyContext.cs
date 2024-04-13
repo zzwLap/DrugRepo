@@ -24,5 +24,6 @@ namespace webapi.Data
         public DbSet<webapi.Models.DrugTransfer> DrugTransfer { get; set; } = default!;
         public DbSet<webapi.Models.DrugTransferDetail> DrugTransferDetail { get; set; } = default!;
         public DbSet<webapi.Models.DrugSendBatchOrder> DrugSendBatchOrder { get; set; } = default!;
+        public DbSet<webapi.Models.Drugs> Drugs { get; set; } = default!;
     }
 }
