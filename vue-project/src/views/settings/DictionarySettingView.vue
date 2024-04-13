@@ -57,8 +57,13 @@
             </div>
         </template>
     </el-dialog>
-
 </template>
+<style scoped>
+.el-card {
+    height: 100%;
+    box-sizing: border-box;
+}
+</style>
 
 <script setup>
 import { getAllCategory, getAllDict } from '@/api/dict';
@@ -71,8 +76,11 @@ const defaultProps = {
     children: 'children',
     label: 'displayName',
 }
-const handleNodeClick = (data) => {
-    console.log(data)
+
+let selectedNode
+const handleNodeClick = async (data) => {
+    selectedNode = data.displayName
+    await getList()
 }
 
 const getTreeList = async () => {
@@ -103,7 +111,7 @@ const rules = {
 
 const dataList = ref()
 const getList = async () => {
-    dataList.value = await getAllDict()
+    dataList.value = await getAllDict(selectedNode)
 }
 getList()
 

@@ -1,5 +1,5 @@
 <template>
-    <el-card>
+    <el-card style="height: 100%;box-sizing:border-box;">
         <template #header>
             <el-button type="primary" @click="mode = 1; formVisible = true">新增用户</el-button>
             <el-button type="primary" @click="refreshData">刷新</el-button>
