@@ -49,7 +49,7 @@ const logout = () => {
             </el-icon>
             <span>药品管理</span>
           </template>
-          <el-menu-item index="3-1">药品信息</el-menu-item>
+          <el-menu-item index="/drug/drug-manage">药品信息</el-menu-item>
           <el-menu-item index="3-2">库存管理</el-menu-item>
           <el-menu-item index="3-3">调拨管理</el-menu-item>
           <el-menu-item index="3-4">损益管理</el-menu-item>

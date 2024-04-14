@@ -5,6 +5,7 @@ import UserManageView from '@/views/authorization/UserManageView.vue'
 import RoleManageView from '@/views/authorization/RoleManageView.vue'
 import AuthorizationManageView from '@/views/authorization/AuthorizationManageView.vue'
 import DictionarySettingView from '@/views/settings/DictionarySettingView.vue'
+import DrugManageView from '@/views/drug/DrugManageView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -18,6 +19,7 @@ const router = createRouter({
         {path:'/authorization/user-manage',component:UserManageView},
         {path:'/authorization/role-manage',component:RoleManageView},
         {path:'/authorization/authorization-manage',component:AuthorizationManageView},
+        {path:'/drug/drug-manage',component:DrugManageView}
       ]
     },
     {
