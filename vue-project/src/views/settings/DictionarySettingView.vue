@@ -1,7 +1,7 @@
 <template>
     <el-card>
         <template #header>
-            <el-button type="primary" @click="mode = 1; formVisible = true">新增用户</el-button>
+            <el-button type="primary" @click="mode = 1; formVisible = true">添加字典</el-button>
             <el-button type="primary" @click="refreshData">刷新</el-button>
         </template>
 
@@ -29,25 +29,16 @@
 
     </el-card>
 
-    <el-dialog v-model="formVisible" title="新增用户" width="500">
+    <el-dialog v-model="formVisible" title="添加字典" width="500">
         <el-form ref="formRef" :model="dataModel" :rules="rules" label-width="auto">
-            <el-form-item label="姓名" prop="userName">
-                <el-input v-model="dataModel.userName" autocomplete="off" />
+            <el-form-item label="名称" prop="displayName">
+                <el-input v-model="dataModel.displayName" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="登录账号" prop="userId">
-                <el-input v-model="dataModel.userId" autocomplete="off" />
+            <el-form-item label="值" prop="value">
+                <el-input v-model="dataModel.value" autocomplete="off" />
             </el-form-item>
-            <el-form-item label="密码" prop="password">
-                <el-input v-model="dataModel.password" type="password" autocomplete="off" />
-            </el-form-item>
-            <el-form-item label="性别" prop="sex">
-                <el-select v-model="dataModel.sex" placeholder="请选择性别">
-                    <el-option label="男" value="男" />
-                    <el-option label="女" value="女" />
-                </el-select>
-            </el-form-item>
-            <el-form-item label="年龄" prop="age">
-                <el-input v-model="dataModel.age" type="number" autocomplete="off" />
+            <el-form-item label="启用">
+                <el-switch v-model="dataModel.enable" />
             </el-form-item>
         </el-form>
         <template #footer>
@@ -97,16 +88,13 @@ getTreeList()
 const formRef = ref()
 const formVisible = ref(false)
 const dataModel = ref({
-    userId: '',
-    userName: '',
-    password: '',
-    sex: '',
-    age: null
+    displayName: '',
+    value: '',
+    enable: true
 })
 const rules = {
-    userId: [{ required: true, min: 3, message: '账号最少3个字符', trigger: 'blur' }],
-    userName: [{ required: true, message: '姓名必填', trigger: 'blur' }],
-    password: [{ required: true, min: 6, message: '密码最少是6个字符', trigger: 'blur' }],
+    displayName: [{ required: true, message: '名称不能为空', trigger: 'blur' }],
+    value: [{ required: true, message: '值不能为空', trigger: 'blur' }],
 }
 
 const dataList = ref()
