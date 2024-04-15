@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Bson;
 using webapi.Data;
 using webapi.Models;
 using webapi.Vo;
@@ -23,8 +21,8 @@ namespace webapi.Controllers
             return dict.ToListAsync();
         }
 
-        [HttpPost]
-        public Task<List<DictionaryDto>> GetDictionaries(List<string> categoryNames)
+        [HttpGet]
+        public Task<List<DictionaryDto>> GetDictionaries([FromQuery] List<string> categoryNames)
         {
             var dict = drugContext.DataDictionary.Where(t => categoryNames.Contains(t.CategoryName))
                   .Select(t => new DictionaryDto() { DisplayName = t.DisplayName, CategoryName = t.CategoryName, Id = t.Id, Value = t.Value });
@@ -32,7 +30,7 @@ namespace webapi.Controllers
         }
 
         [HttpGet]
-        public Task<List<DictionaryDto>> GetDictionaries(string categoryName)
+        public Task<List<DictionaryDto>> GetDictionary(string categoryName)
         {
             var dict = drugContext.DataDictionary.Where(t => categoryName == t.CategoryName)
                   .Select(t => new DictionaryDto() { DisplayName = t.DisplayName, CategoryName = t.CategoryName, Id = t.Id, Value = t.Value });

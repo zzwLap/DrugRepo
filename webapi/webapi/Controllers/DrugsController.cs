@@ -19,6 +19,13 @@ namespace webapi.Controllers
         {
             return await drugContext.Drugs.AsNoTrackingWithIdentityResolution().SelectByType<Drugs, DrugDto>().ToListAsync();
         }
+
+        [HttpGet]
+        public async Task<DrugDto?> GetDrug(int drugId)
+        {
+            return await drugContext.Drugs.AsNoTrackingWithIdentityResolution().SelectByType<Drugs, DrugDto>().FirstOrDefaultAsync(t => t.DrugId == drugId);
+        }
+
         [HttpPost]
         public void AddDrugs(AddDrugVo drugVo)
         {
@@ -37,8 +44,8 @@ namespace webapi.Controllers
             drugContext.SaveChanges();
         }
 
-        [HttpPost]
-        public void ModifyPrice(ChangeDrugPriceVo drugPrice)
+        [HttpPut("{drugId}")]
+        public void ModifyPrice(int drugId, ChangeDrugPriceVo drugPrice)
         {
             var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugPrice.DrugId);
             if (drugInfo == null)
@@ -51,8 +58,8 @@ namespace webapi.Controllers
             drugContext.SaveChanges();
         }
 
-        [HttpPost]
-        public void ModifyDrugInfo(UpdateDrugInfoVo drugInfoVo)
+        [HttpPut("{drugId}")]
+        public void ModifyDrugInfo(int drugId, UpdateDrugInfoVo drugInfoVo)
         {
             var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugInfoVo.DrugId);
             if (drugInfo == null)
