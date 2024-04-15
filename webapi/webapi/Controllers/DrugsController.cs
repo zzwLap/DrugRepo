@@ -27,10 +27,10 @@ namespace webapi.Controllers
         }
 
         [HttpPost]
-        public void AddDrugs(AddDrugVo drugVo)
+        public async Task AddDrugs(AddDrugVo drugVo)
         {
             drugVo.DrugId = 0;
-
+            drugVo.DrugCode = Guid.NewGuid().ToString();
             var checkDupDrug = drugContext.Drugs.Any(t => t.DrugCode == drugVo.DrugCode);
             if (checkDupDrug)
             {
@@ -40,12 +40,11 @@ namespace webapi.Controllers
             drugContext.Drugs.Add(drugs);
             var drug2 = drugContext.Entry(drugs);
             drug2.CurrentValues.SetValues(drugVo);
-
-            drugContext.SaveChanges();
+            await drugContext.SaveChangesAsync();
         }
 
         [HttpPut("{drugId}")]
-        public void ModifyPrice(int drugId, ChangeDrugPriceVo drugPrice)
+        public async Task ModifyPrice(int drugId, ChangeDrugPriceVo drugPrice)
         {
             var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugPrice.DrugId);
             if (drugInfo == null)
@@ -55,11 +54,11 @@ namespace webapi.Controllers
             drugInfo.PackagePrice = drugPrice.PackagePrice;
             drugPrice.ClinicalPrice = drugPrice.ClinicalPrice;
             //TODO 这里应该记录一下每次修改单价后的记录
-            drugContext.SaveChanges();
+            await drugContext.SaveChangesAsync();
         }
 
         [HttpPut("{drugId}")]
-        public void ModifyDrugInfo(int drugId, UpdateDrugInfoVo drugInfoVo)
+        public async Task ModifyDrugInfo(int drugId, UpdateDrugInfoVo drugInfoVo)
         {
             var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugInfoVo.DrugId);
             if (drugInfo == null)
@@ -67,14 +66,20 @@ namespace webapi.Controllers
                 throw new Exception($"未找到药品编号【{drugInfoVo.DrugId}】的记录信息");
             }
             var checkDupDrug = drugContext.Drugs.Any(t => t.DrugCode == drugInfoVo.DrugCode
-                            && t.DrugId == drugInfoVo.DrugId);
+                            && t.DrugId != drugInfoVo.DrugId);
             if (checkDupDrug)
             {
                 throw new Exception("该药品编码已经被使用");
             }
             var drug = drugContext.Drugs.Entry(drugInfo);
             drug.CurrentValues.SetValues(drugInfoVo);
-            drugContext.SaveChanges();
+            await drugContext.SaveChangesAsync();
+        }
+
+        [HttpDelete]
+        public async Task DeleteDrug(int drugId)
+        {
+            await drugContext.Drugs.Where(t => t.DrugId == drugId).ExecuteDeleteAsync();
         }
     }
 
