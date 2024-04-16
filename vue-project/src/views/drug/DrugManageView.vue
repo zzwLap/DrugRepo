@@ -95,7 +95,8 @@
 <script setup>
 import { addDrugService, deleteDrugService, getAllDrugsService, getDrugService, updateDrugService } from '@/api/drug';
 import { ElMessage, ElMessageBox } from 'element-plus';
-import { ref } from 'vue';
+import { pinyin } from 'pinyin-pro';
+import { ref, watch } from 'vue';
 
 const formRef = ref()
 const formVisible = ref(false)
@@ -135,6 +136,12 @@ const rules = {
     packagePrice: [{ required: true, message: '必填', trigger: 'blur' }],
     clinicalPrice: [{ required: true, message: '必填', trigger: 'blur' }],
 }
+
+watch(() => dataModel.value.drugName, (name) => {
+    const resu = pinyin(name, { toneType: "none", type: "array" })
+    dataModel.value.pinYin = resu.map(v => v.at(0).toUpperCase()).join('')
+    console.log(name, resu)
+})
 
 const dataList = ref()
 const getList = async () => {
