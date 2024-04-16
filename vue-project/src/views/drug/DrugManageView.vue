@@ -155,7 +155,7 @@ const handleCreate = async () => {
         await addDrugService(dataModel.value)
         ElMessage.success('药品添加成功')
     } else if (mode === 2) {
-        await updateDrugService(dataModel.value.id, dataModel.value)
+        await updateDrugService(dataModel.value.drugId, dataModel.value)
         ElMessage.success('药品修改成功')
     }
 
@@ -166,7 +166,7 @@ const handleCreate = async () => {
 }
 
 const handleEdit = async (index, row) => {
-    dataModel.value = await getDrugService(row.id)
+    dataModel.value = await getDrugService(row.drugId)
     mode = 2
     formVisible.value = true
 }
@@ -182,7 +182,7 @@ const handleDelete = async (index, row) => {
         }
     )
 
-    await deleteDrugService(row.id)
+    await deleteDrugService(row.drugId)
     await getList()
 }
 </script>

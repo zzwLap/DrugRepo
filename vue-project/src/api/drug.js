@@ -4,16 +4,16 @@ export const getAllDrugsService=()=>{
     return request.get('/api/drugs/getdrugs')
 }
 export const getDrugService=(id)=>{
-    
+    return request.get(`/api/drugs/getdrug?drugId=${id}`)
 }
 export const addDrugService=(drug)=>{
     return request.post('/api/drugs/adddrugs',drug)
 }
 
 export const updateDrugService=(id,drug)=>{
-    return request.post('/api/drugs/modifydruginfo',drug)
+    return request.put(`/api/drugs/modifydruginfo/${id}`,drug)
 }
 
 export const deleteDrugService=(id)=>{
-
+    return request.delete(`/api/drugs/deletedrug?drugId=${id}`)
 }
