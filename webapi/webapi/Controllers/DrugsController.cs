@@ -81,6 +81,38 @@ namespace webapi.Controllers
         {
             await drugContext.Drugs.Where(t => t.DrugId == drugId).ExecuteDeleteAsync();
         }
+
+        [HttpPost]
+        public async Task BatchAddDrugs(List<AddDrugVo> drugListVo)
+        {
+            List<Drugs> drugs = new List<Drugs>();
+            foreach (var drugVo in drugListVo)
+            {
+                var drug = new Drugs();
+                drug.DrugCode = Guid.NewGuid().ToString();
+                drug.DrugId = 0;
+                drug.DrugName = drugVo.DrugName;
+                drug.Spec = drugVo.Spec;
+                drug.PinYin = drugVo.PinYin;
+                drug.Sort = drugVo.Sort;
+                drug.ClinicalUnit = drugVo.ClinicalUnit;
+                drug.PackageUnit = drugVo.PackageUnit;
+                drug.C2PQuantity = drugVo.C2PQuantity;
+                drug.ApprovalNumber = drugVo.ApprovalNumber;
+                drug.DrugCode = drugVo.DrugCode;
+                drug.NationDrugCode = drugVo.NationDrugCode;
+                drug.RADManufacturer = drugVo.RADManufacturer;
+                drug.DosageForm = drugVo.DosageForm;
+                drug.DefaultSaleUnit = drugVo.DefaultSaleUnit;
+                drug.ClinicalSaleUnit = drugVo.ClinicalSaleUnit;
+                drug.PackagePrice = drugVo.PackagePrice;
+                drug.ClinicalPrice = drugVo.ClinicalPrice;
+                drugs.Add(drug);
+            }
+
+            await drugContext.AddRangeAsync(drugs);
+            await drugContext.SaveChangesAsync();
+        }
     }
 
     public class ChangeDrugPriceVo
