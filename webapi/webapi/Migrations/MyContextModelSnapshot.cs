@@ -96,7 +96,7 @@ namespace webapi.Migrations
                     b.Property<int>("StockInId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasComment("入库编号");
+                        .HasComment("入库自增长id编号");
 
                     b.Property<string>("Approver")
                         .IsRequired()
@@ -106,11 +106,6 @@ namespace webapi.Migrations
 
                     b.Property<int>("ApproverId")
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("BatchNo")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasComment("批次号");
 
                     b.Property<string>("Checker")
                         .IsRequired()
@@ -144,6 +139,15 @@ namespace webapi.Migrations
                         .HasColumnType("TEXT")
                         .HasComment("备注");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("INTEGER")
+                        .HasComment("0草稿，1提交，审核");
+
+                    b.Property<string>("StockId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("入库编号-生成的编号");
+
                     b.Property<string>("StockInType")
                         .IsRequired()
                         .HasColumnType("TEXT")
@@ -154,9 +158,8 @@ namespace webapi.Migrations
                         .HasColumnType("TEXT")
                         .HasComment("库房名称");
 
-                    b.Property<string>("WarehoueNo")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
+                    b.Property<int>("WarehoueNo")
+                        .HasColumnType("INTEGER")
                         .HasComment("库房编号");
 
                     b.HasKey("StockInId");
@@ -173,6 +176,11 @@ namespace webapi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("批次号");
+
                     b.Property<DateTime>("CreateTime")
                         .HasColumnType("TEXT");
 
@@ -184,6 +192,10 @@ namespace webapi.Migrations
                         .HasColumnType("INTEGER")
                         .HasComment("入库数量");
 
+                    b.Property<int>("InputQuantity")
+                        .HasColumnType("INTEGER")
+                        .HasComment("输入数量");
+
                     b.Property<decimal>("PurchasePrice")
                         .HasColumnType("TEXT")
                         .HasComment("采购单价");
@@ -193,9 +205,14 @@ namespace webapi.Migrations
                         .HasColumnType("TEXT")
                         .HasComment("单据号");
 
-                    b.Property<int>("StockInId")
+                    b.Property<string>("StockId")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("入库编号");
+
+                    b.Property<int>("UnitType")
                         .HasColumnType("INTEGER")
-                        .HasComment("单据号");
+                        .HasComment("入库单位类别，0包装单位，1零售单位");
 
                     b.HasKey("Id");
 
@@ -418,7 +435,6 @@ namespace webapi.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ApprovalNumber")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("批准文号");
 
@@ -445,12 +461,10 @@ namespace webapi.Migrations
                         .HasComment("销售单位");
 
                     b.Property<string>("DosageForm")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("药品剂型");
 
                     b.Property<string>("DrugCode")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("本地药品编码");
 
@@ -461,7 +475,6 @@ namespace webapi.Migrations
                         .HasComment("药品名称");
 
                     b.Property<string>("NationDrugCode")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("国家药品编码");
 
@@ -476,12 +489,10 @@ namespace webapi.Migrations
                         .HasComment("包装单位");
 
                     b.Property<string>("PinYin")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("拼音码");
 
                     b.Property<string>("RADManufacturer")
-                        .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("药品研发厂家");
 

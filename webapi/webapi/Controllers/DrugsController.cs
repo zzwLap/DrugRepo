@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MiniExcelLibs;
+using NuGet.ContentModel;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using webapi.Data;
 using webapi.Models;
 
@@ -44,8 +47,14 @@ namespace webapi.Controllers
         }
 
         [HttpPut("{drugId}")]
-        public async Task ModifyPrice(int drugId, ChangeDrugPriceVo drugPrice)
+        [HttpPatch("{drugId}")]
+        public async Task<IActionResult> ModifyPrice(int drugId, ChangeDrugPriceVo drugPrice)
         {
+            if (drugId != drugPrice.DrugId)
+            {
+                return BadRequest();
+            }
+
             var drugInfo = drugContext.Drugs.FirstOrDefault(t => t.DrugId == drugPrice.DrugId);
             if (drugInfo == null)
             {
@@ -55,6 +64,7 @@ namespace webapi.Controllers
             drugPrice.ClinicalPrice = drugPrice.ClinicalPrice;
             //TODO 这里应该记录一下每次修改单价后的记录
             await drugContext.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpPut("{drugId}")]
@@ -86,22 +96,22 @@ namespace webapi.Controllers
         public async Task BatchAddDrugs(List<AddDrugVo> drugListVo)
         {
             List<Drugs> drugs = new List<Drugs>();
+            
             foreach (var drugVo in drugListVo)
             {
                 var drug = new Drugs();
                 drug.DrugCode = Guid.NewGuid().ToString();
                 drug.DrugId = 0;
                 drug.DrugName = drugVo.DrugName;
-                drug.Spec = drugVo.Spec;
+                drug.Spec = drugVo.Spec ?? "";
                 drug.PinYin = drugVo.PinYin;
                 drug.Sort = drugVo.Sort;
                 drug.ClinicalUnit = drugVo.ClinicalUnit;
                 drug.PackageUnit = drugVo.PackageUnit;
                 drug.C2PQuantity = drugVo.C2PQuantity;
                 drug.ApprovalNumber = drugVo.ApprovalNumber;
-                drug.DrugCode = drugVo.DrugCode;
                 drug.NationDrugCode = drugVo.NationDrugCode;
-                drug.RADManufacturer = drugVo.RADManufacturer;
+                drug.RADManufacturer = drugVo.RADManufacturer ?? "";
                 drug.DosageForm = drugVo.DosageForm;
                 drug.DefaultSaleUnit = drugVo.DefaultSaleUnit;
                 drug.ClinicalSaleUnit = drugVo.ClinicalSaleUnit;
@@ -112,6 +122,62 @@ namespace webapi.Controllers
 
             await drugContext.AddRangeAsync(drugs);
             await drugContext.SaveChangesAsync();
+        }
+
+        [HttpPost]
+        public async Task UploadDrugFileBatchAddDrugs(IFormFile file)
+        {
+            var fileName = Guid.NewGuid().ToString();
+            using (FileStream fs = new FileStream(fileName, FileMode.Create))
+            {
+                await file.CopyToAsync(fs);
+            }
+            AnalyzeAndAddDrugs(fileName);
+        }
+
+        private async void AnalyzeAndAddDrugs(string fileName)
+        {
+            List<AddDrugVo> drugVo = new List<AddDrugVo>();
+            var rows = MiniExcel.Query(fileName, excelType: ExcelType.XLSX).Skip(3).ToList();
+
+            for (int i = 0; i < rows.Count(); i++)
+            {
+                AddDrugVo drug = new AddDrugVo();
+                drug.DrugCode = Guid.NewGuid().ToString();
+                drug.DrugId = 0;
+                drug.DrugName = rows[i].C;
+                drug.Spec = rows[i].E;
+                drug.PinYin = PingYinHelper.GetFirstSpell(rows[i].C);
+                drug.Sort = Convert.ToInt32(rows[i].A);
+                drug.ClinicalUnit = "无";
+                drug.PackageUnit = PackageUnit(rows[i].C);
+                drug.C2PQuantity = 1;
+                drug.ApprovalNumber = rows[i].B;
+                drug.NationDrugCode = "";
+                drug.RADManufacturer = rows[i].F;
+                drug.DosageForm = rows[i].D;
+                drug.DefaultSaleUnit = 0;
+                drug.ClinicalSaleUnit = 1;
+                drug.PackagePrice = 1;
+                drug.ClinicalPrice = 1;
+                drugVo.Add(drug);
+            }
+
+            await BatchAddDrugs(drugVo);
+        }
+        private List<string> h = new List<string>()
+        {
+            "片", "丸"
+        };
+        private List<string> p = new List<string>()
+        {
+            "液", "剂"
+        };
+        private string PackageUnit(string str)
+        {
+            if (h.Any(t => str.Contains(t))) return "盒";
+            if (h.Any(t => str.Contains(t))) return "瓶";
+            return "";
         }
     }
 

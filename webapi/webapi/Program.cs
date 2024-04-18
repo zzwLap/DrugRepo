@@ -10,6 +10,7 @@ using System.Text;
 using webapi;
 using webapi.Data;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using webapi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MyContext>(options =>
@@ -18,6 +19,7 @@ builder.Services.AddDbContext<MyContext>(options =>
 // Add services to the container.
 
 builder.Services.AddTransient<DapperContext>();
+builder.Services.AddSingleton<IdGeneratorService>();
 
 builder.Services.AddControllers(options =>
 {

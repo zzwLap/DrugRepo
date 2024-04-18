@@ -7,9 +7,11 @@ namespace webapi.Models
     [Comment("药品入库")]
     public class DrugStockIn
     {
-        [Comment("入库编号")]
+        [Comment("入库自增长id编号")]
         [Key]
         public int StockInId { get; set; }
+        [Comment("入库编号-生成的编号")]
+        public string StockId { get; set; }
         [Comment("单据号")]
         [StringLength(50)]
         public string ReceiptNo { get; set; }
@@ -30,28 +32,35 @@ namespace webapi.Models
         [Comment("入库类别")]
         public string StockInType { get; set; }
         [Comment("库房编号")]
-        public string WarehoueNo { get; set; }
+        public int WarehoueNo { get; set; }
         [Comment("库房名称")]
         public string WarehoueName { get; set; }
         public DateTime CreateTime { get; set; }
-        [Comment("批次号")]
-        public string BatchNo { get; set; }
+        [Comment("0草稿，1提交，审核")]
+        public int Status { get; set; }
     }
+
     [Comment("药品入库明细")]
     public class DrugStockInDetail
     {
         public int Id { get; set; }
-        [Comment("单据号")]
-        public int StockInId { get; set; }
+        [Comment("入库编号")]
+        public string StockId { get; set; }
         [Comment("单据号")]
         public string ReceiptNo { get; set; }
         [Comment("药品编号")]
         public int DrugId { get; set; }
+        [Comment("入库单位类别，0包装单位，1零售单位")]
+        public int UnitType { get; set; }
         [Comment("入库数量")]
         public int InQuantity { get; set; }
+        [Comment("输入数量")]
+        public int InputQuantity { get; set; }
         [Comment("采购单价")]
         public decimal PurchasePrice { get; set; }
         public DateTime CreateTime { get; set; }
+        [Comment("批次号")]
+        public string BatchNo { get; set; }
     }
     [Comment("药品出库")]
     public class DrugStockOut
