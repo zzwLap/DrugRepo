@@ -53,6 +53,48 @@ namespace webapi.Migrations
                     b.ToTable("DataDictionary");
                 });
 
+            modelBuilder.Entity("webapi.Models.DrugInOutInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("CurrentQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("DrugId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("EventType")
+                        .HasColumnType("INTEGER")
+                        .HasComment("0(入库,增益),1(出库,报损),2(调拨)");
+
+                    b.Property<int>("InOutQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("InOutWay")
+                        .HasColumnType("INTEGER")
+                        .HasComment("进出库方式，入库方式具体看入库表，出库方式看出库表");
+
+                    b.Property<int>("OriginalQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("ReceiptNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("单据号");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DrugInOutInfo", t =>
+                        {
+                            t.HasComment("入库出库调拨记录");
+                        });
+                });
+
             modelBuilder.Entity("webapi.Models.DrugSendBatchOrder", b =>
                 {
                     b.Property<int>("Id")
@@ -74,7 +116,7 @@ namespace webapi.Migrations
 
                     b.Property<int>("EventType")
                         .HasColumnType("INTEGER")
-                        .HasComment("出库或调拨");
+                        .HasComment("入库,出库,调拨，增益，报损");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("INTEGER");
@@ -128,6 +170,15 @@ namespace webapi.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("InWay")
+                        .HasColumnType("INTEGER")
+                        .HasComment("入库方式");
+
+                    b.Property<string>("Manufacturer")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("制造商--这个只需要名字就行了");
+
                     b.Property<string>("ReceiptNo")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -143,15 +194,10 @@ namespace webapi.Migrations
                         .HasColumnType("INTEGER")
                         .HasComment("0草稿，1提交，审核");
 
-                    b.Property<string>("StockId")
+                    b.Property<string>("StockInNo")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("入库编号-生成的编号");
-
-                    b.Property<string>("StockInType")
-                        .IsRequired()
-                        .HasColumnType("TEXT")
-                        .HasComment("入库类别");
 
                     b.Property<string>("WarehoueName")
                         .IsRequired()
@@ -188,6 +234,15 @@ namespace webapi.Migrations
                         .HasColumnType("INTEGER")
                         .HasComment("药品编号");
 
+                    b.Property<string>("DrugName")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("药品名称");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("TEXT")
+                        .HasComment("有效期");
+
                     b.Property<int>("InQuantity")
                         .HasColumnType("INTEGER")
                         .HasComment("入库数量");
@@ -205,7 +260,7 @@ namespace webapi.Migrations
                         .HasColumnType("TEXT")
                         .HasComment("单据号");
 
-                    b.Property<string>("StockId")
+                    b.Property<string>("StockInNo")
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("入库编号");
@@ -227,7 +282,7 @@ namespace webapi.Migrations
                     b.Property<int>("StockOutId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER")
-                        .HasComment("入库编号");
+                        .HasComment("出库主键");
 
                     b.Property<string>("Approver")
                         .IsRequired()
@@ -259,6 +314,10 @@ namespace webapi.Migrations
                     b.Property<int>("CreatorId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<int>("OutWay")
+                        .HasColumnType("INTEGER")
+                        .HasComment("出库方式");
+
                     b.Property<string>("ReceiptNo")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -269,6 +328,10 @@ namespace webapi.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT")
                         .HasComment("备注");
+
+                    b.Property<int>("StockOutNo")
+                        .HasColumnType("INTEGER")
+                        .HasComment("出库编号");
 
                     b.Property<string>("StockOutType")
                         .IsRequired()
@@ -428,6 +491,78 @@ namespace webapi.Migrations
                         });
                 });
 
+            modelBuilder.Entity("webapi.Models.DrugWarehouse", b =>
+                {
+                    b.Property<int>("StockId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ActQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DrugId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("DrugName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("NeedSendQuantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StockNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("WarehouseName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("WarehouseNo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("StockId");
+
+                    b.ToTable("DrugWarehouse");
+                });
+
+            modelBuilder.Entity("webapi.Models.DrugWarehouseDetail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BatchNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreateTime")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("DrugId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("ExpirationDate")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("StockNo")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("WarehoseNo")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DrugWarehouseDetail");
+                });
+
             modelBuilder.Entity("webapi.Models.Drugs", b =>
                 {
                     b.Property<int>("DrugId")
@@ -473,6 +608,11 @@ namespace webapi.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("TEXT")
                         .HasComment("药品名称");
+
+                    b.Property<string>("DrugType")
+                        .IsRequired()
+                        .HasColumnType("TEXT")
+                        .HasComment("药品类别，0表示中药，1表示西药");
 
                     b.Property<string>("NationDrugCode")
                         .HasColumnType("TEXT")

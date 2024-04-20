@@ -20,6 +20,7 @@ builder.Services.AddDbContext<MyContext>(options =>
 
 builder.Services.AddTransient<DapperContext>();
 builder.Services.AddSingleton<IdGeneratorService>();
+builder.Services.AddSingleton<CacheInfo>();
 
 builder.Services.AddControllers(options =>
 {

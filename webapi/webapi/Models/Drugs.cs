@@ -10,6 +10,8 @@ namespace webapi.Models
         [MaxLength(50)]
         [Comment("药品名称")]
         public string DrugName { get; set; }
+        [Comment("药品类别，0表示中药，1表示西药")]
+        public string DrugType { get; set; }
         [Comment("药品规格")]
         public string Spec { get; set; }
         [Comment("拼音码")]
@@ -39,7 +41,7 @@ namespace webapi.Models
         public int DefaultSaleUnit { get; set; }
         [Comment("临床销售单位")]
         public int ClinicalSaleUnit { get; set; }
-          
+
         [Comment("包装单位销售单价")]
         [Precision(16, 4)]
         public decimal PackagePrice { get; set; }

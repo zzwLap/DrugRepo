@@ -1,6 +1,4 @@
-﻿using MassTransit;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc;
 using webapi.Data;
 using webapi.Models;
 
@@ -10,191 +8,113 @@ namespace webapi.Controllers
     [ApiController]
     public class DrugStockController(MyContext drugContext, IdGeneratorService idGenerator) : ControllerBase
     {
-        [HttpGet]
-        public Task<List<DisplayDrug>> GetDrugs(QueryDrugDto query)
+        public static void StockIn(MyContext drugContext, DrugStockIn stockIn)
         {
-            var drug = drugContext.Drugs.AsQueryable();
-
-            if (String.IsNullOrWhiteSpace(query.PinYin))
+            var receiptNo = stockIn.ReceiptNo;
+            if (string.IsNullOrWhiteSpace(stockIn.ReceiptNo))
             {
-                drug = drug.Where(t => t.PinYin.StartsWith(query.PinYin));
+                throw new Exception("单据号不能为空");
             }
-            if (String.IsNullOrWhiteSpace(query.DrugName))
+            var warehouseNo = stockIn.WarehoueNo;
+
+            var stockInDetail = drugContext.DrugStockInDetail.Where(t => t.ReceiptNo == stockIn.ReceiptNo && t.StockInNo == stockIn.StockInNo).Select(t => new StockInDetail()
             {
-                drug = drug.Where(t => t.DrugName.StartsWith(query.DrugName));
-            }
+                BatchNo = t.BatchNo,
+                DrugId = t.DrugId,
+                Quantity = t.InQuantity,
+            }).ToList();
 
-            return drug.OrderBy(t => t.Sort).SelectByType<Drugs, DisplayDrug>().ToListAsync();
-        }
-
-        [HttpPost]
-        public async Task AddDrug(Tuple<AddStockIn, List<AddStockInDetail>> stockInfo)
-        {
-            var stockId = idGenerator.GetNextId();
-            var receiptNo = idGenerator.GenerateNextReceiptId("");
-
-            var dt = DateTime.Now;
-            var stockMain = stockInfo.Item1;
-            DrugStockIn stockIn = new DrugStockIn();
-            stockIn.Creator = "admin";
-            stockIn.CreatorId = this.GetUserId();
-            stockIn.WarehoueNo = stockMain.WarehouseNo;
-            stockIn.WarehoueName = stockMain.WarehouseName;
-            stockIn.Remarks = stockMain.Remarks;
-            stockIn.ReceiptNo = receiptNo;
-
-            List<DrugStockInDetail> stockDetail = new List<DrugStockInDetail>();
-            foreach (var item in stockInfo.Item2)
+            if (stockInDetail.Count() == 0)
             {
-                DrugStockInDetail detail = new DrugStockInDetail();
-                detail.DrugId = item.DrugId;
-                detail.StockId = stockId;
-                detail.ReceiptNo = receiptNo;
-                detail.BatchNo = item.BatchNo;
-                //TODO 需要修改
-                detail.InQuantity = item.InputQuantity * 1;
-                detail.InputQuantity = item.InputQuantity;
-                detail.PurchasePrice = item.PurchasePrice;
-                detail.CreateTime = dt;
-                detail.UnitType = item.UnitType;
-                stockDetail.Add(detail);
+                throw new Exception("该单据下没有数据要审核");
             }
-            drugContext.DrugStockIn.Add(stockIn);
-            drugContext.DrugStockInDetail.AddRange(stockDetail);
-            await drugContext.SaveChangesAsync();
-        }
 
-        [HttpPut("{recepitNo}")]
-        [HttpPatch("{recepitNo}")]
-        public async Task ModifyDrugs(string recepitNo, List<AddStockInDetail> adds)
-        {
-            var stockIn = drugContext.DrugStockIn.SingleOrDefault(t => t.ReceiptNo == recepitNo);
-            if (stockIn == null)
-            {
-                throw new Exception("没有找到该药品信息");
-            }
-            var drugs = adds.Select(t => t.DrugId);
-
-            var list = drugContext.DrugStockInDetail.Where(t => t.ReceiptNo == stockIn.ReceiptNo && t.StockId == stockIn.StockId
-                             && drugs.Contains(t.DrugId)).ToDictionary(t => t.DrugId, t => t);
-
+            var drugIds = stockInDetail.Select(t => t.DrugId);
+            var warehouse = drugContext.DrugWarehouse.Where(t => drugIds.Contains(t.DrugId) && t.WarehouseNo == warehouseNo)
+                .ToDictionary(t => t.DrugId, t => t);
+            var drugInfos = drugContext.Drugs.Where(t => drugIds.Contains(t.DrugId))
+                .ToDictionary(t => t.DrugId, t => t.DrugName);
+            var guid = Guid.NewGuid().ToString();
             DateTime dt = DateTime.Now;
-            foreach (var item in adds)
+            List<DrugWarehouseDetail> drugDetail = new List<DrugWarehouseDetail>();
+            List<DrugWarehouse> drugwarehouse = new List<DrugWarehouse>();
+            List<DrugInOutInfo> inoutInfo = new List<DrugInOutInfo>();
+
+            foreach (var item in stockInDetail)
             {
-                if (list.ContainsKey(item.DrugId))
+                var detail = new DrugWarehouseDetail()
                 {
-                    var v = list[item.DrugId];
-                    v.BatchNo = item.BatchNo;
-                    v.PurchasePrice = item.PurchasePrice;
-                    v.InQuantity = item.InputQuantity * 1;
-                    v.InputQuantity = item.InputQuantity;
-                    v.UnitType = item.UnitType;
+                    Id = 0,
+                    StockNo = guid,
+                    DrugId = item.DrugId,
+                    WarehoseNo = warehouseNo,
+                    BatchNo = item.BatchNo,
+                    Quantity = item.Quantity,
+                    CreateTime = dt,
+                    ExpirationDate = item.ExpirationDate,
+                };
+                drugDetail.Add(detail);
+            }
+
+            foreach (var item in stockInDetail)
+            {
+                DrugInOutInfo drugStockInfo = new DrugInOutInfo();
+                drugStockInfo.DrugId = item.DrugId;
+                drugStockInfo.ReceiptNo = receiptNo;
+                drugStockInfo.EventType = 0;
+                drugStockInfo.CreateTime = dt;
+                drugStockInfo.InOutWay = stockIn.InWay;
+
+                if (warehouse.ContainsKey(item.DrugId))
+                {
+                    var drugWareHose = warehouse[item.DrugId];
+                    drugWareHose.ActQuantity = drugWareHose.ActQuantity + item.Quantity;
+
+                    drugStockInfo.OriginalQuantity = drugWareHose.ActQuantity - item.Quantity;
+                    drugStockInfo.CurrentQuantity = drugWareHose.ActQuantity;
+                    drugStockInfo.InOutQuantity = item.Quantity;
                 }
                 else
                 {
-                    drugContext.DrugStockInDetail.Add(new DrugStockInDetail()
+                    var newDrugMain = new DrugWarehouse()
                     {
+                        StockId = 0,
+                        StockNo = guid,
                         DrugId = item.DrugId,
-                        StockId = stockIn.StockId,
-                        BatchNo = item.BatchNo,
+                        DrugName = drugInfos[item.DrugId],
+                        WarehouseNo = warehouseNo,
+                        WarehouseName = "",
+                        ActQuantity = item.Quantity,
+                        NeedSendQuantity = 0,
                         CreateTime = dt,
-                        InputQuantity = item.InputQuantity,
-                        InQuantity = item.InputQuantity,
-                        PurchasePrice = item.PurchasePrice,
-                        ReceiptNo = stockIn.ReceiptNo,
-                        UnitType = item.UnitType,
-                        Id = 0,
-                    });
+                    };
+                    drugwarehouse.Add(newDrugMain);
+
+                    drugStockInfo.OriginalQuantity = 0;
+                    drugStockInfo.CurrentQuantity = item.Quantity;
+                    drugStockInfo.InOutQuantity = item.Quantity;
                 }
+
+                inoutInfo.Add(drugStockInfo);
             }
 
-            await drugContext.SaveChangesAsync();
-        }
-
-        [HttpPut("{recepitNo}")]
-        public async Task ApproveStockRecord(string recepitNo)
-        {
-            var stockIn = drugContext.DrugStockIn.SingleOrDefault(t => t.ReceiptNo == recepitNo);
-            if (stockIn == null)
-            {
-                throw new Exception("未找到单据信息");
-            }
-            if (stockIn.Status == 1)
-            {
-                throw new Exception("只有单据在提交状态时才能审核");
-            }
-            stockIn.Status = 1;
-            await drugContext.SaveChangesAsync();
-        }
-
-        [HttpDelete("{recepitNo}")]
-        public async Task DeleteStockRecord(string recepitNo)
-        {
-            var stockIn = drugContext.DrugStockIn.SingleOrDefault(t => t.ReceiptNo == recepitNo);
-            if (stockIn == null)
-            {
-                throw new Exception("未找到单据信息");
-            }
-            if (stockIn.Status == 2)
-            {
-                throw new Exception("已经审核的单据不允许删除");
-            }
-            if (stockIn.Status == 0)
-            {
-                throw new Exception("只有单据在草稿状态时才能被删除，请撤销提交后再删除");
-            }
-            await drugContext.DrugStockIn.Where(t => t.ReceiptNo == recepitNo).ExecuteDeleteAsync();
-            await drugContext.DrugStockInDetail.Where(t => t.ReceiptNo == recepitNo).ExecuteDeleteAsync();
+            drugContext.DrugWarehouse.AddRange(drugwarehouse);
+            drugContext.DrugWarehouseDetail.AddRange(drugDetail);
+            drugContext.DrugInOutInfo.AddRange(inoutInfo);
         }
     }
-
-    public class QueryDrugDto
-    {
-        public string PinYin { get; set; }
-        public string DrugName { get; set; }
-    }
-
-    public class DisplayDrug
+    public class StockInDetail()
     {
         public int DrugId { get; set; }
-        public string DrugName { get; set; }
-        public string Spec { get; set; }
-        public string PinYin { get; set; }
-        public string ClinicalUnit { get; set; }
-        public string PackageUnit { get; set; }
-        public int C2PQuantity { get; set; }
-        public string ApprovalNumber { get; set; }
-        public string DrugCode { get; set; }
-        public string DosageForm { get; set; }
-        public decimal PackagePrice { get; set; }
-    }
-
-    public class AddStockIn
-    {
-        public int WarehouseNo { get; set; }
-        public string WarehouseName { get; set; }
-        public string Remarks { get; set; }
-    }
-
-    public class AddStockInDetail
-    {
-        public int DrugId { get; set; }
-        public string DrugName { get; set; }
+        public int Quantity { get; set; }
         public string BatchNo { get; set; }
-        public int InputQuantity { get; set; }
-        public int UnitType { get; set; }
-        public decimal PurchasePrice { get; set; }
+        public DateTime ExpirationDate { get; set; }
     }
 
-    public class IdGeneratorService
+    public class StockOutDetail()
     {
-        public string GetNextId()
-        {
-            return NewId.Next().ToString();
-        }
-        public string GenerateNextReceiptId(string currentReceiptId)
-        {
-            return Guid.NewGuid().ToString();
-        }
+        public int DrugId { get; set; }
+        public int Quantity { get; set; }
+        public string BatchNo { get; set; }
     }
 }

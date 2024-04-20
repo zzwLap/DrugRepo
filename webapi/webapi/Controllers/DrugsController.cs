@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MiniExcelLibs;
-using NuGet.ContentModel;
 using System.ComponentModel.DataAnnotations;
-using System.IO;
 using webapi.Data;
 using webapi.Models;
 
@@ -12,15 +10,15 @@ namespace webapi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [AllowAnonymous]
     public class DrugsController(MyContext drugContext) : ControllerBase
     {
         private readonly MyContext drugContext = drugContext;
 
         [HttpGet]
-        public async Task<List<DrugDto>> GetDrugs()
+        public async Task<Page<DrugDto>> GetDrugs(int pageIndex, int pageSize)
         {
-            return await drugContext.Drugs.AsNoTrackingWithIdentityResolution().SelectByType<Drugs, DrugDto>().ToListAsync();
+            return await drugContext.Drugs.AsNoTrackingWithIdentityResolution().SelectByType<Drugs, DrugDto>()
+                .ToPageListAsync(new PageInfo() { PageIndex = pageIndex, PageSize = pageSize });
         }
 
         [HttpGet]
@@ -96,7 +94,7 @@ namespace webapi.Controllers
         public async Task BatchAddDrugs(List<AddDrugVo> drugListVo)
         {
             List<Drugs> drugs = new List<Drugs>();
-            
+
             foreach (var drugVo in drugListVo)
             {
                 var drug = new Drugs();
@@ -120,7 +118,7 @@ namespace webapi.Controllers
                 drugs.Add(drug);
             }
 
-            await drugContext.AddRangeAsync(drugs);
+            await drugContext.AddRangeAsync(drugs.Take(10));
             await drugContext.SaveChangesAsync();
         }
 
@@ -225,6 +223,7 @@ namespace webapi.Controllers
     {
         [Key]
         public int DrugId { get; set; }
+        public int DrugType { get; set; }
         [Required]
         public string DrugName { get; set; }
         public string Spec { get; set; }

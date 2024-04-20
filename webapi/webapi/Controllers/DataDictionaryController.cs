@@ -9,7 +9,6 @@ namespace webapi.Controllers
 {
     [Route("api/[controller]/[action]")]
     [ApiController]
-    [AllowAnonymous]
     public class DataDictionaryController(MyContext drugContext) : ControllerBase
     {
         private const string CommonDict = "普通字典";
