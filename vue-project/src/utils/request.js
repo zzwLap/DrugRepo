@@ -13,7 +13,7 @@ export const tokenStore = {
 
 export const request = axios.create({
     baseURL: '/proxy',
-    timeout: 3000
+    timeout: 10000
 })
 
 request.interceptors.request.use(request => {

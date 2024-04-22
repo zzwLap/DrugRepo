@@ -17,3 +17,11 @@ export const updateDrugService=(id,drug)=>{
 export const deleteDrugService=(id)=>{
     return request.delete(`/api/drugs/deletedrug?drugId=${id}`)
 }
+
+export const batchAddDrugsService=(drugs)=>{
+    return request.post('/api/drugs/batchadddrugs',drugs)
+}
+
+export const uploadExcelFileService=(file)=>{
+    return request.postForm('/api/drugs/uploaddrugfilebatchadddrugs',{file:file})
+}

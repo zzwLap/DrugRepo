@@ -1,37 +1,49 @@
 <template>
-    <el-card style="height: 100%;box-sizing:border-box;">
+    <el-card style="width: 100%;height: 100%;box-sizing:border-box;">
         <template #header>
             <el-button type="primary" @click="mode = 1; formVisible = true">添加药品</el-button>
             <el-button type="primary" @click="refreshData">刷新</el-button>
+            <input type="file" @change="handleImport">
+            <input type="file" @change="handleFileUpload">
         </template>
-        <el-table :data="dataList" stripe border style="width: 100%">
-            <el-table-column prop="drugId" label="Id" />
-            <el-table-column prop="drugName" label="药品名称" />
-            <el-table-column prop="spec" label="药品规格" />
-            <el-table-column prop="pinYin" label="拼音码" />
-            <el-table-column prop="sort" label="排序编号" />
-            <el-table-column prop="clinicalUnit" label="临床单位" />
-            <el-table-column prop="packageUnit" label="包装单位" />
-            <el-table-column prop="c2PQuantity" label="临床到包装单位的转换" />
-            <el-table-column prop="approvalNumber" label="批准文号" />
-            <el-table-column prop="drugCode" label="本地药品编码" />
-            <el-table-column prop="nationDrugCode" label="国家药品编码" />
-            <el-table-column prop="radManufacturer" label="药品研发厂家" />
-            <el-table-column prop="dosageForm" label="药品剂型" />
-            <el-table-column prop="defaultSaleUnit" label="销售单位" />
-            <el-table-column prop="clinicalSaleUnit" label="临床销售单位" />
-            <el-table-column prop="packagePrice" label="包装单位销售单价" />
-            <el-table-column prop="clinicalPrice" label="临床销售单价" />
-            <el-table-column label="操作">
+        <el-table :data="dataList" stripe border style="height: 500px;">
+            <el-table-column label="操作" width="140">
                 <template #default="scope">
                     <el-button size="small" @click="handleEdit(scope.$index, scope.row)">修改</el-button>
                     <el-button size="small" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
                 </template>
             </el-table-column>
+            <el-table-column prop="drugId" label="Id" />
+            <el-table-column prop="drugName" label="药品名称" width="150" />
+            <el-table-column prop="spec" label="药品规格" width="150" />
+            <el-table-column prop="pinYin" label="拼音码"  width="150"/>
+            <el-table-column prop="sort" label="排序编号" width="90" />
+            <el-table-column prop="clinicalUnit" label="临床单位" width="90" />
+            <el-table-column prop="packageUnit" label="包装单位" width="90" />
+            <el-table-column prop="c2PQuantity" label="转换比" />
+            <el-table-column prop="approvalNumber" label="批准文号" width="200" />
+            <!-- <el-table-column prop="drugCode" label="本地药品编码" /> -->
+            <el-table-column prop="nationDrugCode" label="国家药品编码" width="120" />
+            <el-table-column prop="radManufacturer" label="药品研发厂家" width="200" />
+            <el-table-column prop="dosageForm" label="药品剂型" width="90" />
+            <el-table-column prop="defaultSaleUnit" label="销售单位" width="90" />
+            <el-table-column prop="clinicalSaleUnit" label="临床销售单位" width="120" />
+            <el-table-column prop="packagePrice" label="包装单位销售单价" />
+            <el-table-column prop="clinicalPrice" label="临床销售单价" />
         </el-table>
+        <el-pagination
+        style="width: 100%;"
+      v-model:current-page="currentPage4"
+      v-model:page-size="pageSize4"
+      :page-sizes="[100, 200, 300, 400]"
+      layout="total, sizes, prev, pager, next, jumper"
+      :total="400"
+      @size-change="handleSizeChange"
+      @current-change="handleCurrentChange"
+    />
     </el-card>
 
-    <el-dialog v-model="formVisible" title="添加药品" width="850">
+    <el-dialog v-model="formVisible" title="添加药品" width="850" :close-on-click-modal="false">
         <el-form :inline="true" ref="formRef" :model="dataModel" :rules="rules" label-width="auto">
             <el-form-item label="药品名称" prop="drugName">
                 <el-input v-model="dataModel.drugName" autocomplete="off" />
@@ -93,9 +105,10 @@
 </template>
 
 <script setup>
-import { addDrugService, deleteDrugService, getAllDrugsService, getDrugService, updateDrugService } from '@/api/drug';
+import { addDrugService, batchAddDrugsService, deleteDrugService, getAllDrugsService, getDrugService, updateDrugService, uploadExcelFileService } from '@/api/drug';
 import { ElMessage, ElMessageBox } from 'element-plus';
 import { pinyin } from 'pinyin-pro';
+import readXlsxFile from 'read-excel-file';
 import { ref, watch } from 'vue';
 
 const formRef = ref()
@@ -135,6 +148,15 @@ const rules = {
     clinicalSaleUnit: [{ required: true, message: '必填', trigger: 'blur' }],
     packagePrice: [{ required: true, message: '必填', trigger: 'blur' }],
     clinicalPrice: [{ required: true, message: '必填', trigger: 'blur' }],
+}
+
+const currentPage4 = ref(4)
+const pageSize4 = ref(100)
+const handleSizeChange = (val) => {
+  console.log(`${val} items per page`)
+}
+const handleCurrentChange = (val) => {
+  console.log(`current page: ${val}`)
 }
 
 watch(() => dataModel.value.drugName, (name) => {
@@ -191,5 +213,44 @@ const handleDelete = async (index, row) => {
 
     await deleteDrugService(row.drugId)
     await getList()
+}
+
+const handleImport = async (e) => {
+    if (e.target.files.length) {
+        const rows = await readXlsxFile(e.target.files[0])
+        const drugs = rows.slice(3, 5).map(item => {
+            const drug = {
+                drugName: item[2],
+                approvalNumber: item[1],
+                dosageForm: item[7],
+                spec: item[8],
+                nationDrugCode: item[9],
+                drugId:0,
+                clinicalUnit:'无',
+                packageUnit:'无',
+                c2PQuantity:1,
+                drugCode:'无',
+                radManufacturer:'',
+                packagePrice:1,
+                clinicalPrice:1,
+            }
+
+            const resu = pinyin(drug.drugName, { toneType: "none", type: "array" })
+            drug.pinYin = resu.map(v => v.at(0).toUpperCase()).join('')
+            return drug
+        })
+        await batchAddDrugsService(drugs)
+        ElMessage.success('药品导入成功')
+        await getList()
+    }
+}
+
+const handleFileUpload=async(e)=>{
+    if(e.target.files.length){
+        let file = e.target.files[0]
+        await uploadExcelFileService(file)
+        ElMessage.success('上传成功')
+        await getList()
+    }
 }
 </script>
