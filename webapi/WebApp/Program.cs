@@ -1,16 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
 using webapi;
 using webapi.Data;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using webapi.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<MyContext>(options =>
@@ -18,7 +13,7 @@ builder.Services.AddDbContext<MyContext>(options =>
 
 // Add services to the container.
 
-builder.Services.AddTransient<DapperContext>();
+builder.Services.AddSingleton<DapperContext>();
 builder.Services.AddSingleton<IdGeneratorService>();
 builder.Services.AddSingleton<CacheInfo>();
 
@@ -26,7 +21,6 @@ builder.Services.AddControllers(options =>
 {
     // 添加异常过滤器
     options.Filters.Add<ApiExceptionFilter>();
-    //options.OutputFormatters.RemoveType<HttpNoContentOutputFormatter>();
 });
 
 // URL小写
@@ -103,16 +97,3 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
-
-
-public class ApiExceptionFilter : IExceptionFilter
-{
-    public void OnException(ExceptionContext context)
-    {
-        context.Result = new ContentResult
-        {
-            StatusCode = 500,
-            Content = context.Exception.Message
-        };
-    }
-}

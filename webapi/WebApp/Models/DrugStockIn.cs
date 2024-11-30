@@ -60,8 +60,9 @@ namespace webapi.Models
         public int InQuantity { get; set; }
         [Comment("输入数量")]
         public int InputQuantity { get; set; }
-        [Comment("采购单价")]
-        public decimal PurchasePrice { get; set; }
+
+        [Comment("采购金额")]
+        public decimal PurchaseAmount { get; set; }
         public DateTime CreateTime { get; set; }
         [Comment("批次号")]
         public string BatchNo { get; set; }
