@@ -1,0 +1,523 @@
+﻿<dx:ThemedWindow
+    x:Class="KQClient.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dx="http://schemas.devexpress.com/winfx/2008/xaml/core"
+    xmlns:dxa="http://schemas.devexpress.com/winfx/2008/xaml/accordion"
+    xmlns:dxb="http://schemas.devexpress.com/winfx/2008/xaml/bars"
+    xmlns:dxe="http://schemas.devexpress.com/winfx/2008/xaml/editors"
+    xmlns:dxmvvm="http://schemas.devexpress.com/winfx/2008/xaml/mvvm"
+    xmlns:hc="https://handyorg.github.io/handycontrol"
+    xmlns:local="clr-namespace:KQClient"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="mainWindow"
+    Title="口腔His系统"
+    Width="1200"
+    Height="700"
+    Margin="0"
+    Padding="0"
+    d:DataContext="{d:DesignInstance Type=local:MainViewModel}"
+    AllowsTransparency="False"
+    Background="{StaticResource ClientBackground}"
+    BorderThickness="0"
+    HeaderBackground="{StaticResource WindowHeaderBackground}"
+    MouseDown="Window_MouseDown"
+    ResizeBorderThickness="4"
+    ResizeMode="CanResizeWithGrip"
+    ShowIcon="False"
+    StateChanged="ThemedWindow_StateChanged"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    mc:Ignorable="d">
+    <Window.Resources>
+        <ControlTemplate x:Key="ListBoxItemTemplate" TargetType="ListBoxItem">
+            <Border
+                Name="border"
+                Padding="10,6"
+                CornerRadius="6"
+                SnapsToDevicePixels="true">
+                <ContentPresenter />
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsSelected" Value="true">
+                    <Setter TargetName="border" Property="Background" Value="{StaticResource SelectedItemBackground}" />
+                    <Setter Property="Foreground" Value="White" />
+                </Trigger>
+                <Trigger Property="IsMouseOver" Value="true">
+                    <Setter TargetName="border" Property="Background" Value="{StaticResource MenuMouseOverItemBackground}" />
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <DataTemplate x:Key="ListBoxItemDataTemplate" DataType="ListBoxItem">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition />
+                </Grid.ColumnDefinitions>
+                <Image
+                    Height="20"
+                    Source="{Binding Icon}"
+                    Visibility="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.ShowGlyph, Converter={dxmvvm:BooleanToVisibilityConverter}}" />
+                <TextBlock
+                    Grid.Column="1"
+                    Margin="6,10"
+                    VerticalAlignment="Center"
+                    Foreground="White"
+                    Text="{Binding Title}" />
+            </Grid>
+        </DataTemplate>
+
+        <ControlTemplate x:Key="CheckBoxTemplate" TargetType="CheckBox">
+            <Border
+                Width="{TemplateBinding Width}"
+                Height="{TemplateBinding Height}"
+                Background="Transparent">
+                <Image
+                    x:Name="imgOpen"
+                    RenderTransformOrigin="0.5,0.5"
+                    Source="{StaticResource HamburgerButtonImage}">
+                    <Image.RenderTransform>
+                        <RotateTransform />
+                    </Image.RenderTransform>
+                </Image>
+            </Border>
+            <ControlTemplate.Triggers>
+                <Trigger Property="IsChecked" Value="True">
+                    <Trigger.EnterActions>
+                        <BeginStoryboard>
+                            <Storyboard Storyboard.TargetName="imgOpen" Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)">
+                                <DoubleAnimation To="180" Duration="0:0:0.25" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.EnterActions>
+                    <Trigger.ExitActions>
+                        <BeginStoryboard>
+                            <Storyboard Storyboard.TargetName="imgOpen" Storyboard.TargetProperty="(Image.RenderTransform).(RotateTransform.Angle)">
+                                <DoubleAnimation To="0" Duration="0:0:0.25" />
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </Trigger.ExitActions>
+                </Trigger>
+            </ControlTemplate.Triggers>
+        </ControlTemplate>
+
+        <DataTemplate x:Key="DxTabItemHeaderTemplate" DataType="dx:DXTabItem">
+            <Grid Background="Transparent">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    Margin="0,2,0,0"
+                    HorizontalAlignment="Center"
+                    FontSize="14"
+                    Text="{Binding DisplayName}" />
+                <Button
+                    Grid.Column="1"
+                    Margin="0,0,0,0"
+                    Padding="8,0"
+                    Background="Red"
+                    BorderThickness="0"
+                    Command="{Binding CloseCommand}">
+                    <Button.Template>
+                        <ControlTemplate>
+                            <Border
+                                Margin="{TemplateBinding Margin}"
+                                Padding="{TemplateBinding Padding}"
+                                Background="Transparent">
+                                <Path
+                                    x:Name="closePath"
+                                    VerticalAlignment="Center"
+                                    Data="F1M0,1L0,0 1,0 4,3 7,0 8,0 8,1 5,4 8,7 8,8 7,8 4,5 1,8 0,8 0,7 3,4 0,1z"
+                                    Fill="Black"
+                                    Stroke="Black" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="closePath" Property="Fill" Value="Red" />
+                                    <Setter TargetName="closePath" Property="Stroke" Value="Red" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="DxTabItemContentTemplate" DataType="dx:DXTabItem">
+            <Border
+                Margin="0"
+                Padding="0"
+                Background="{StaticResource ClientBackground}"
+                BorderBrush="Red">
+                <ContentControl Content="{Binding Content}" />
+            </Border>
+        </DataTemplate>
+
+    </Window.Resources>
+    <dxmvvm:Interaction.Behaviors>
+        <dx:SplashScreenManagerService PredefinedSplashScreenType="WaitIndicator" />
+    </dxmvvm:Interaction.Behaviors>
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <DockPanel x:Name="grid" Background="{StaticResource MainMenuBackground}">
+            <Image
+                Width="50"
+                Height="50"
+                Margin="4,15"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                DockPanel.Dock="Top"
+                Source="/Img/logo.png"
+                Stretch="Uniform" />
+            <CheckBox
+                Width="25"
+                Height="25"
+                Margin="4,10"
+                HorizontalAlignment="Center"
+                DockPanel.Dock="Bottom"
+                IsChecked="{Binding ShowGlyph}"
+                Template="{StaticResource CheckBoxTemplate}" />
+
+            <ListBox
+                x:Name="listBox"
+                Background="Transparent"
+                BorderThickness="0"
+                Foreground="White"
+                ItemsSource="{Binding Modules}"
+                SelectedItem="{Binding CurrentModule}">
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Template" Value="{StaticResource ListBoxItemTemplate}" />
+                        <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_MouseDown" />
+                        <Setter Property="ContentTemplate" Value="{StaticResource ListBoxItemDataTemplate}" />
+                    </Style>
+                </ListBox.ItemContainerStyle>
+            </ListBox>
+            <dxe:FlyoutControl
+                x:Name="popup"
+                Width="145"
+                Padding="0"
+                AllowMoveAnimation="True"
+                AllowOutOfScreen="True"
+                AnimationDuration="0"
+                IsOpen="{Binding MenuIsOpen}"
+                PlacementTarget="{Binding ElementName=grid}"
+                StaysOpen="True">
+                <dxe:FlyoutControl.Settings>
+                    <dxe:FlyoutSettings Placement="Right" />
+                </dxe:FlyoutControl.Settings>
+                <Border Background="{StaticResource ClientBackground}">
+                    <StackPanel>
+                        <Border
+                            Width="150"
+                            Height="50"
+                            Margin="-1,0"
+                            BorderBrush="Gray"
+                            BorderThickness="0,0,0,1">
+                            <Label
+                                Height="35"
+                                Margin="20,5"
+                                Content="{Binding MainMenuType}"
+                                FontSize="18"
+                                FontWeight="Bold" />
+                        </Border>
+                        <dxa:AccordionControl
+                            Margin="10,10"
+                            Background="Transparent"
+                            ChildrenPath="SubMenus"
+                            ItemsSource="{Binding CurrentModule.SubMenus}"
+                            SelectionMode="Single"
+                            SelectionUnit="SubItem">
+                            <dxa:AccordionControl.ItemContainerStyle>
+                                <Style TargetType="dxa:AccordionItem">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="FontSize" Value="14" />
+                                    <Setter Property="Margin" Value="0,2" />
+                                    <Setter Property="Command" Value="{Binding RelativeSource={RelativeSource AncestorType=Window, Mode=FindAncestor}, Path=DataContext.OpenViewCommand}" />
+                                    <Setter Property="CommandParameter" Value="{Binding Path=.}" />
+                                    <Setter Property="HeaderTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Title}" />
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Setter Property="Glyph" Value="{Binding Icon}" />
+                                    <Setter Property="GlyphTemplate">
+                                        <Setter.Value>
+                                            <DataTemplate>
+                                                <Border VerticalAlignment="Center">
+                                                    <Image
+                                                        Width="16"
+                                                        Height="16"
+                                                        Margin="0,7,0,0"
+                                                        Source="{Binding}"
+                                                        Stretch="Uniform" />
+                                                </Border>
+                                            </DataTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </dxa:AccordionControl.ItemContainerStyle>
+                        </dxa:AccordionControl>
+                    </StackPanel>
+                </Border>
+            </dxe:FlyoutControl>
+        </DockPanel>
+
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="40" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <Grid>
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                        <!--<dxb:MainMenuControl VerticalAlignment="Stretch" Background="White">
+                            <dxb:BarButtonItem
+                                Margin="0,3,0,0"
+                                BarItemDisplayMode="ContentAndGlyph"
+                                Content="帮助" />
+                            <dxb:BarSubItem
+                                Margin="10,3,0,0"
+                                BarItemDisplayMode="ContentAndGlyph"
+                                Content="提醒" />
+                            <dxb:BarSubItem
+                                Margin="10,3,0,0"
+                                BarItemDisplayMode="ContentAndGlyph"
+                                Content="系统设置">
+                                <dxb:BarButtonItem Content="主题" />
+                                <dxb:BarButtonItem Content="字体设置" />
+                            </dxb:BarSubItem>
+                            <dxb:BarSubItem
+                                Margin="10,3,0,0"
+                                BarItemDisplayMode="ContentAndGlyph"
+                                Content="用户名">
+                                <dxb:BarButtonItem Content="修改密码" />
+                                <dxb:BarButtonItem Content="注销登录" />
+                            </dxb:BarSubItem>
+                        </dxb:MainMenuControl>-->
+                        <hc:Badge
+                            x:Name="MsgBadge"
+                            Height="20"
+                            Margin="20,5"
+                            VerticalAlignment="Bottom"
+                            Background="LightGreen"
+                            BadgeMargin="0,-14,-20,0"
+                            Value="0">
+                            <Button
+                                x:Name="MsgBtn"
+                                Width="30"
+                                Height="20"
+                                Background="White"
+                                Click="MsgClick"
+                                Content="&#xe64d;"
+                                Foreground="Black"
+                                Style="{StaticResource IconButtonStyle}" />
+                        </hc:Badge>
+                        <Popup
+                            x:Name="MsgPopup"
+                            AllowsTransparency="True"
+                            Opacity="1"
+                            Placement="Bottom"
+                            PlacementTarget="{Binding ElementName=MsgBadge}"
+                            PopupAnimation="Fade">
+                            <Border
+                                MinWidth="250"
+                                MinHeight="600"
+                                Padding="5"
+                                Background="White"
+                                BorderBrush="LightGray"
+                                BorderThickness="1"
+                                CornerRadius="5">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30" />
+                                        <RowDefinition Height="*" />
+                                    </Grid.RowDefinitions>
+                                    <DockPanel VerticalAlignment="Center">
+                                        <TextBlock
+                                            HorizontalAlignment="Left"
+                                            VerticalAlignment="Center"
+                                            FontSize="16"
+                                            Foreground="red"
+                                            Text="历史消息通知" />
+                                        <!--  清除按钮  -->
+                                        <Button
+                                            Width="20"
+                                            Height="20"
+                                            Margin="0,0,5,0"
+                                            HorizontalAlignment="Right"
+                                            Click="ClearButton_Click"
+                                            Content="&#xe615;"
+                                            Style="{StaticResource IconButtonStyle}"
+                                            ToolTip="清除历史消息" />
+                                    </DockPanel>
+                                    <Border BorderBrush="Black" BorderThickness="0,0,0,1" />
+                                    <StackPanel Grid.Row="1">
+                                        <!--  ListBox控件  -->
+                                        <ListBox
+                                            Name="MyListBox"
+                                            Height="100"
+                                            ItemsSource="{Binding MsgQueue}"
+                                            Style="{StaticResource ClockListBoxStyle}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </Popup>
+                        <Button
+                            Margin="0,3,0,0"
+                            Click="WindowButtonClick"
+                            Style="{StaticResource MinimizeButton}"
+                            Tag="WindowMinimize" />
+                        <Button
+                            x:Name="MaximizeBtn"
+                            Margin="0,3,0,0"
+                            Click="WindowButtonClick"
+                            Style="{StaticResource MaximizeButton}"
+                            Tag="WindowMaximize" />
+                        <Button
+                            x:Name="RestoreBtn"
+                            Margin="0,3,0,0"
+                            Click="WindowButtonClick"
+                            Style="{StaticResource RestoreDownButton}"
+                            Tag="WindowRestore" />
+                        <Button
+                            Click="WindowButtonClick"
+                            Style="{StaticResource CloseButton}"
+                            Tag="WindowClose" />
+                    </StackPanel>
+                    <Label
+                        Height="40"
+                        HorizontalAlignment="Left"
+                        Content="口腔虹桥中心分院"
+                        FontSize="18"
+                        FontWeight="Bold"
+                        Foreground="#23527C" />
+                </DockPanel>
+            </Grid>
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="869*" />
+                    <ColumnDefinition Width="273*" />
+                </Grid.ColumnDefinitions>
+                <dx:DXTabControl Grid.ColumnSpan="2" ItemsSource="{Binding WorkSpace.Workspaces}">
+                    <dx:DXTabControl.BackgroundTemplate>
+                        <DataTemplate>
+                            <Border
+                                Background="{Binding Background}"
+                                BorderBrush="LightGray"
+                                BorderThickness="0,1,0,0" />
+                        </DataTemplate>
+                    </dx:DXTabControl.BackgroundTemplate>
+                    <dx:DXTabControl.View>
+                        <dx:TabControlScrollView ShowHeaderMenu="True" ShowVisibleTabItemsInHeaderMenu="False" />
+                    </dx:DXTabControl.View>
+                    <dx:DXTabControl.ItemContainerStyle>
+                        <Style TargetType="dx:DXTabItem">
+                            <Setter Property="ContentTemplate" Value="{StaticResource DxTabItemContentTemplate}" />
+                            <Setter Property="HeaderTemplate" Value="{StaticResource DxTabItemHeaderTemplate}" />
+                            <Setter Property="IsSelected" Value="{Binding IsActive}" />
+                            <Setter Property="HeaderMenuGlyph" Value="{Binding Glyph}" />
+                            <Setter Property="Glyph" Value="{Binding Glyph}" />
+                            <Setter Property="GlyphTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <Border
+                                            Height="26"
+                                            Margin="4,0"
+                                            VerticalAlignment="Center">
+                                            <Image
+                                                Width="16"
+                                                Height="16"
+                                                Margin="0,7,0,0"
+                                                Source="{Binding}"
+                                                Stretch="Uniform" />
+                                        </Border>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="AllowDrop" Value="True" />
+                            <Setter Property="Background">
+                                <Setter.Value>
+                                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                        <GradientStop Offset="0" Color="White" />
+                                        <GradientStop Offset="1" Color="#91D6F3" />
+                                    </LinearGradientBrush>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="dx:DXTabItem">
+                                        <Border
+                                            x:Name="Border"
+                                            Margin="0,0,1,0"
+                                            Background="{TemplateBinding Background}"
+                                            BorderBrush="{TemplateBinding BorderBrush}"
+                                            BorderThickness="{TemplateBinding BorderThickness}"
+                                            CornerRadius="5,5,0,0">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition />
+                                                    <ColumnDefinition />
+                                                </Grid.ColumnDefinitions>
+                                                <ContentPresenter
+                                                    Grid.Column="0"
+                                                    Margin="{TemplateBinding Padding}"
+                                                    HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                                    VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                                    ContentSource="Header" />
+                                            </Grid>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="true">
+                                                <Setter Property="FontWeight" Value="Bold" />
+                                                <Setter TargetName="Border" Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                                            <GradientStop Offset="0" Color="#d0e5f7" />
+                                                            <GradientStop Offset="1" Color="#FF317EF3" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="true">
+                                                <Setter TargetName="Border" Property="Background">
+                                                    <Setter.Value>
+                                                        <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                                                            <GradientStop Offset="0" Color="#d0e5f7" />
+                                                            <GradientStop Offset="1" Color="#FF317EF3" />
+                                                        </LinearGradientBrush>
+                                                    </Setter.Value>
+                                                </Setter>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </dx:DXTabControl.ItemContainerStyle>
+                </dx:DXTabControl>
+                <!--  接收消息  -->
+                <ScrollViewer
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    Panel.ZIndex="1"
+                    VerticalScrollBarVisibility="Hidden">
+                    <StackPanel
+                        Margin="0,10,10,10"
+                        VerticalAlignment="Top"
+                        hc:Growl.GrowlParent="True" />
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+    </Grid>
+</dx:ThemedWindow>
